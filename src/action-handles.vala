@@ -16,6 +16,7 @@ namespace G4 {
     public const string ACTION_TOGGLE_SEARCH = "toggle-search";
     public const string ACTION_TOGGLE_SORT = "toggle-sort";
     public const string ACTION_QUIT = "quit";
+    public const string ACTION_ADD_TO_PLAYLIST = "add-to-playlist";
 
     struct ActionShortKey {
         public unowned string name;
@@ -43,7 +44,8 @@ namespace G4 {
                 { ACTION_SORT, sort_by, "s", "'2'" },
                 { ACTION_TOGGLE_SEARCH, toggle_search },
                 { ACTION_TOGGLE_SORT, toggle_sort },
-                { ACTION_QUIT, () => _app.quit () }
+                { ACTION_QUIT, () => _app.quit () },
+                { ACTION_ADD_TO_PLAYLIST, add_to_playlist, "aay" }
             };
             app.add_action_entries (action_entries, this);
 
@@ -247,6 +249,10 @@ namespace G4 {
                 _app.sort_mode = SortMode.ALBUM;
             else
                 _app.sort_mode = _app.sort_mode + 1;
+        }
+
+        private void add_to_playlist (SimpleAction action, Variant? parameter) {
+            var uri = _parse_uri_form_parameter (parameter);
         }
     }
 }

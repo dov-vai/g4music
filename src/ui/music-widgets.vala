@@ -269,6 +269,7 @@ namespace G4 {
         menu.append_item (create_menu_item_for_strv ({"album", music.album}, _("Search Album"), ACTION_APP + ACTION_SEARCH));
         menu.append_item (create_menu_item_for_strv ({"artist", music.artist}, _("Search Artist"), ACTION_APP + ACTION_SEARCH));
         menu.append_item (create_menu_item_for_uri (music.uri, _("_Show Music File"), ACTION_APP + ACTION_SHOW_FILE));
+        menu.append_item (create_menu_item_for_uri (music.uri, _("Add To Playlist"), ACTION_APP + ACTION_ADD_TO_PLAYLIST));
         return menu;
     }
 
