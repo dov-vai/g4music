@@ -253,6 +253,8 @@ namespace G4 {
 
         private void add_to_playlist (SimpleAction action, Variant? parameter) {
             var uri = _parse_uri_form_parameter (parameter);
+            var win = new PlaylistAddWindow (_app);
+            win.present ();
         }
     }
 }

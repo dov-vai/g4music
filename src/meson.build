@@ -22,6 +22,7 @@ sources = [
   'ui/store-panel.vala',
   'ui/volume-button.vala',
   'ui/window.vala',
+  'ui/playlist.vala',
   'utils/async-task.vala',
   'utils/cover-cache.vala',
   'utils/data-io.vala',

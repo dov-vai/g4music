@@ -6,5 +6,6 @@
     <file>gtk/play-panel.ui</file>
     <file>gtk/preferences.ui</file>
     <file>gtk/store-panel.ui</file>
+    <file>gtk/add-playlist.ui</file>
   </gresource>
 </gresources>
