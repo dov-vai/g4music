@@ -13,6 +13,7 @@ namespace G4 {
         private int _duration = 0;
         private int _position = 0;
         private bool _remain_progress = false;
+        private bool _seeking = false;
 
         public signal void position_seeked (double position);
 
@@ -24,11 +25,8 @@ namespace G4 {
 
             _seek.set_range (0, _duration);
             _seek.halign = Gtk.Align.FILL;
-            _seek.adjust_bounds.connect ((value) => {
-                player.seek (GstPlayer.from_second (value));
-                position_seeked (value);
-            });
             append (_seek);
+            setup_seek_bar (player);
 
             var times = new Gtk.CenterBox ();
             times.baseline_position = Gtk.BaselinePosition.CENTER;
@@ -146,6 +144,58 @@ namespace G4 {
         }
 
         private void on_position_changed (Gst.ClockTime position) {
+            if (!_seeking) {
+                update_position (position);
+            }
+        }
+
+        private void on_state_changed (Gst.State state) {
+            var playing = state == Gst.State.PLAYING;
+            _play.icon_name = playing ? "media-playback-pause-symbolic" : "media-playback-start-symbolic";
+        }
+
+        private void setup_seek_bar (GstPlayer player) {
+            _seek.change_value.connect ((type, value) => {
+                if (_seeking) {
+                    position_seeked (value);
+                    update_position (GstPlayer.from_second (value));
+                    return true;
+                }
+                return false;
+            });
+
+            // Hack that grabs the click gesture controller as mouse released event doesn't work otherwise
+            // Bug: https://gitlab.gnome.org/GNOME/gtk/-/issues/4939
+            Gtk.GestureClick? click_gesture = null;
+            var controllers = _seek.observe_controllers ();
+            for (var i = 0; i < controllers.get_n_items (); i++) {
+                var controller = controllers.get_item (i);
+                if (controller is Gtk.GestureClick) {
+                    click_gesture = (Gtk.GestureClick) controller;
+                    break;
+                }
+            }
+            if (click_gesture == null) {
+                click_gesture = new Gtk.GestureClick ();
+                _seek.add_controller ((!)click_gesture);
+            }
+            var gesture = (!)click_gesture;
+            gesture.set_button (0);
+            gesture.pressed.connect(() => _seeking = true);
+            gesture.released.connect(() => {
+                _seeking = false;
+                player.seek(GstPlayer.from_second (_seek.get_value ()));
+            });
+        }
+
+        private void update_negative_label () {
+            if (_remain_progress)
+                _negative.label = "-" + format_time (_duration - _position);
+            else
+                _negative.label = format_time (_duration);
+        }
+
+        private void update_position (Gst.ClockTime position) {
             var value = GstPlayer.to_second (position);
             if (_position != (int) value) {
                 _position = (int) value;
@@ -154,18 +204,6 @@ namespace G4 {
                     _negative.label = "-" + format_time (_duration - _position);
             }
             _seek.set_value (value);
-        }
-
-        private void on_state_changed (Gst.State state) {
-            var playing = state == Gst.State.PLAYING;
-            _play.icon_name = playing ? "media-playback-pause-symbolic" : "media-playback-start-symbolic";
-        }
-
-        private void update_negative_label () {
-            if (_remain_progress)
-                _negative.label = "-" + format_time (_duration - _position);
-            else
-                _negative.label = format_time (_duration);
         }
     }
 
